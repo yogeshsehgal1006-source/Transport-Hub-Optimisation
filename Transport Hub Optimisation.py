@@ -11,39 +11,35 @@ import folium
 from folium.plugins import MarkerCluster
 import webbrowser
 
-# ---------------------------------------------
-# 1. Define the place
+# 1. Defining the place i want to do this project on
 place = "Birmingham, United Kingdom"
 
-# ---------------------------------------------
-# 2. Download residential buildings
-print("📦 Downloading residential building data from OpenStreetMap...")
+# 2. Downloading residential building data
+print(" Downloading residential building data from OpenStreetMap...")
 buildings = ox.features_from_place(place, tags={'building': 'residential'})
 
 # Drop rows without geometry and reset index
 buildings = buildings.dropna(subset=['geometry']).reset_index()
 
-# Convert building polygons to centroids
+# Convert building polygons to simple points(Centroids)
 residential = buildings[['geometry']].copy()
 residential['geometry'] = residential.centroid
 
-# Convert CRS to WGS84 (lat/lon)
 residential = residential.set_geometry('geometry').to_crs(epsg=4326)
 
-# Extract latitude and longitude
+# Extracting latitude and longitude
 residential['lat'] = residential.geometry.y
 residential['lon'] = residential.geometry.x
 
 # Show sample coordinates
-print("\n📍 Sample coordinates:")
+print("\n Sample coordinates:")
 print(residential[['lat', 'lon']].head())
 
-# ---------------------------------------------
 # 3. Clustering residential buildings into hubs
 coordinates = residential[['lat', 'lon']].values
-k = 20  # Number of transport hubs
+k = 20  # Number of transport hubs, variable so can change this value
 
-print(f"\n🔀 Clustering into {k} hubs...")
+print(f"\n Clustering into {k} hubs...")
 kmeans = KMeans(n_clusters=k, random_state=0)
 kmeans.fit(coordinates)
 
@@ -55,7 +51,6 @@ hubs = gp.GeoDataFrame(geometry=gp.points_from_xy(
 # Assign each building to the nearest hub
 residential['hub_id'] = kmeans.predict(coordinates)
 
-# ---------------------------------------------
 # 4. Compute straight-line distance to each building's hub
 
 
@@ -64,16 +59,15 @@ def compute_distance(row):
     return geodesic((row['lat'], row['lon']), (hub_lat, hub_lon)).meters
 
 
-print("\n📏 Computing walking distances...")
+print("\n Computing walking distances...")
 residential['dist_to_hub'] = residential.apply(compute_distance, axis=1)
 
 # Report average distance
 average_distance = residential['dist_to_hub'].mean()
 print(
-    f"\n✅ Average walking distance to the nearest hub: {average_distance:.2f} meters")
+    f"\n Average walking distance to the nearest hub: {average_distance:.2f} meters")
 
-# ---------------------------------------------
-# 5. Ask for user location input with retry and cleanup
+# 5. Ask for user location input with retry
 geolocator = Nominatim(user_agent="transport-hub-mapper")
 
 
@@ -82,24 +76,24 @@ def try_geocode(address):
         location = geolocator.geocode(address, timeout=10)
         return location
     except Exception as e:
-        print(f"⚠️ Geocoding error: {e}")
+        print(f" Geocoding error: {e}")
         return None
 
 
 user_lat = user_lon = None
 while True:
     user_input = input(
-        "\n📍 Enter your location (e.g. '123 High Street, Birmingham'): ").strip()
+        "\n Enter your location (e.g. '123 High Street, Birmingham'): ").strip()
 
     if not user_input:
-        print("❌ You must enter a location. Try again.")
+        print(" You must enter a location. Try again.")
         continue
 
     # Normalize input: capitalize and ensure it includes 'Birmingham'
     if "birmingham" not in user_input.lower():
         user_input += ", Birmingham"
 
-    print(f"🔎 Trying to geocode: {user_input}")
+    print(f" Trying to geocode: {user_input}")
     location = try_geocode(user_input)
 
     if location:
@@ -110,10 +104,9 @@ while True:
         break
     else:
         print(
-            "❌ Location not found. Please try again with more detail (e.g. street + city).")
+            " Location not found. Please try again with more detail (e.g. street + city).")
         time.sleep(1)
 
-# ---------------------------------------------
 # 6. Find nearest hub to user location
 min_dist = float('inf')
 nearest_hub = None
@@ -125,11 +118,10 @@ if user_lat is not None and user_lon is not None:
             nearest_hub = idx
 
     print(
-        f"\n📏 Distance from your location to nearest hub (Hub {nearest_hub}): {min_dist:.2f} meters")
+        f"\n Distance from your location to nearest hub (Hub {nearest_hub}): {min_dist:.2f} meters")
 
-# ---------------------------------------------
 # 7. Create interactive Folium map
-print("\n🗺️ Creating map...")
+print("\n Creating map...")
 center_lat = residential['lat'].mean()
 center_lon = residential['lon'].mean()
 m = folium.Map(location=[center_lat, center_lon], zoom_start=12)
@@ -142,7 +134,7 @@ colors = [
 ]
 
 # Add residential points
-print("📍 Plotting residential buildings...")
+print(" Plotting residential buildings...")
 for idx, row in residential.iterrows():
     color = colors[row['hub_id'] % len(colors)]
     folium.CircleMarker(
@@ -184,10 +176,9 @@ if user_lat is not None and user_lon is not None and nearest_hub is not None:
         tooltip=f'Distance: {min_dist:.2f} meters'
     ).add_to(m)
 
-# ---------------------------------------------
 # 8. Save and open the map
 map_filename = 'birmingham_transport_clusters.html'
 m.save(map_filename)
 print(f"\n✅ Map saved to '{map_filename}'")
-print("🌐 Opening map in browser...")
+print(" Opening map in browser...")
 webbrowser.open(map_filename)
