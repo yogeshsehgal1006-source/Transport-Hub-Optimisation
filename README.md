@@ -1,15 +1,53 @@
-This project identifies the most optimal transport hub locations in a select area, in my case Birmingham,UK. Residential building data has been gathered using OpenStreetMap, and i had used KMeans clustering in order ot find the optimal hub locations. This project gathers information from a user, using their residential data to calculate the walking distances from their building to the nearest hub. All of the information is then presented on an interactive Folium map.
+Birmingham Transport Hub Clustering & Accessibility Mapper
 
-Requirements:
-You must install the following package before running the code:
-pip install osmnx geopandas pandas scikit-learn numpy geopy folium
+A project that uses data from OpenStreetMap, K=Means Clustering and user input to create a select number of transport hubs around the city of Birmingham. It aims to find the most optimal hub locations based on address/population density.
 
-How to use this code:
-1) Clone the repository
-2) Run the following python script: python hub_mapper.py
-3) Run the code, and enter a suitable location when asked
-4) Wait for a few minutes, and the script will open a HTML map in your browser
-5) Run the code, but use different residential locations. Change the variable k in the script, and you will see a different amount of hubs.
+Overview:
+
+Residential data is downloaded based on the city of Birmingham. This data then gets grouped into K number of clusters using K-Means clustering. The script then asks for user input of an address in Birmingham, whereby the distance from the address and nearest transport hub is calculated. This is then visualized on a Folium map which you can interact with.
+
+Features:
+
+OpenStreetMap Integration: Downloads real residential building data for Birmingham using "osmnx".
+K-Means Clustering: Groups residential points into k cluster counts (`k=200` by default) to optimize potential transport hub placements.
+Distance Analysis: Calculates straight-line and walking distances from buildings to the nearest hub.
+Interactive Mapping: Generates a custom HTML map (`birmingham_transport_clusters.html`) featuring color-coded clusters, hub markers, and user to hub pathing.
+
+Dependencies:
+
+Copy and Paste the following into your terminal to download the requirements to run this project:
+pip install requests osmnx geopandas pandas scikit-learn numpy geopy folium
+
+How to run the code:
+1) Run the following:
+
+   git clone https://github.com/yogeshsehgal1006-source/Transport-Hub-Optimisation.git
+
+2) Then create the following directory:
+
+   cd Transport-Hub-Optimisation
+
+3) Then set up a virtual environment:
+
+   python -m venv venv
+   
+   venv\Scripts\activate
+
+   or (Mac/Linux)
+
+   python3 -m venv venv
+
+   source venv/bin/activate
+
+4) Install the Dependencies:
+
+   pip install requests osmnx geopandas pandas scikit-learn numpy geopy folium
+
+5) Then run the following:
+
+   python Transport Hub Optimisation.py
+
+
 
 
 
