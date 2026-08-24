@@ -13,6 +13,14 @@ K-Means Clustering: Groups residential points into k cluster counts (`k=200` by 
 Distance Analysis: Calculates straight-line and walking distances from buildings to the nearest hub.
 Interactive Mapping: Generates a custom HTML map (`birmingham_transport_clusters.html`) featuring color-coded clusters, hub markers, and user to hub pathing.
 
+How It Works:
+
+Data Collection: Fetches all residential data within Birmingham boundaries.
+Centroid Extraction: Converts building polygons into point coordinates.
+Clustering: Uses K-Means algorithm to find optimal central coordinates for k hubs.
+Geocoding & Distance Calculation : Uses geopy to locate user inputs and compute distances to the closest hub.
+Visualization: Plots data onto a Folium map using certain marker descriptions and a designated colour palette.
+
 Dependencies:
 
 Copy and Paste the following into your terminal to download the requirements to run this project:
@@ -45,7 +53,7 @@ How to run the code:
 
 5) Then run the following:
 
-   python Transport Hub Optimisation.py
+   python Transport_Hub_Optimisation.py
 
 
 
